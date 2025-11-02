@@ -38,23 +38,35 @@ namespace module
         }
         public void ThirdTask()
         {
-            decimal avgSal = salary.Average(n => n.AmountFirst + n.AmountSecond);
-            List<int> sal = salary.Where(n => n.AmountFirst + n.AmountSecond < avgSal).Select(n => n.Id).ToList();
-            List<Worker> workersWithBelowAvgSalary = worker.Where(n => sal.Contains(n.Id)).ToList();
-            foreach (var worker in workersWithBelowAvgSalary)
+           decimal averageSalary = salary.Average(n => n.AmountFirst + n.AmountSecond);
+          var workserBelowAvarage = worker.Join(salary,
+                w => w.Id,
+                s => s.Id,
+                (w, s) => new { Worker = w, Salary = s })
+                .Where(ws => (ws.Salary.AmountFirst + ws.Salary.AmountSecond) < averageSalary)
+                .Select(ws => ws.Worker)
+                .ToList();
+            foreach (var worker in workserBelowAvarage)
             {
                 Console.WriteLine($"Worker Name: {worker.Name}");
             }
 
+
         }
         public void FourthTask(decimal input)
         {
-            List<int> ints = salary.Where(n => n.AmountFirst + n.AmountSecond > input).Select(n => n.Id).ToList();
-            List<Worker> workersWithSalaryAboveInput = worker.Where(n => ints.Contains(n.Id) && n.LevelOfEducation == Education.University).ToList();
-            foreach (var worker in workersWithSalaryAboveInput)
-            {
-                Console.WriteLine($"Worker Name: {worker.Name}, Education Level: {worker.LevelOfEducation}");
+            var selectedWorkers = worker.Join(salary,
+                w => w.Id,
+                s => s.Id,
+                (w, s) => new { Worker = w, Salary = s })
+                .Where(ws => (ws.Salary.AmountFirst + ws.Salary.AmountSecond) > input && ws.Worker.LevelOfEducation == Education.University)
+                .Select(ws => ws.Worker)
+                .ToList();
+            foreach (var worker in selectedWorkers)
+                {
+                Console.WriteLine($"Worker Name: {worker.Name}");
+                }
+
             }
-        }
     }
 }
